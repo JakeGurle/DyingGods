@@ -1,0 +1,10 @@
+#This file tells Git what files to ignore. Basically, we want it to only see our code.
+
+/Binaries/
+/Build/
+/Config/
+/Content/
+/Intermediate/
+/Saved/
+/*.uproject
+/*.FBX
