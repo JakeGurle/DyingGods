@@ -1,9 +1,14 @@
-
+/*
+* Implements the Hero actor class's behavior (camera, movement, attacks)
+*/
 
 #include "DyingGods.h"
 #include "Hero.h"
 
-//The constructor
+/*
+* Constructor
+* @PCIP: Initializes default actor properties
+*/
 AHero::AHero(const class FPostConstructInitializeProperties& PCIP)
 	: Super(PCIP)
 {
@@ -14,7 +19,9 @@ AHero::AHero(const class FPostConstructInitializeProperties& PCIP)
 	}
 	//Create a camera component
 	FirstPersonCameraComponent = PCIP.CreateDefaultSubobject<UCameraComponent>(this, TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->AttachParent = CapsuleComponent; //Attach the camera component to our capsule (the hero)
+	//Attach the camera component to our capsule (the hero)
+	FirstPersonCameraComponent->AttachParent = CapsuleComponent;
+	//Adjust the height of the camera so it's in a logical place relative to the model
 	FirstPersonCameraComponent->RelativeLocation = FVector(0, 0, 25.0f + BaseEyeHeight);
 	//Create first person mesh
 	FirstPersonMesh = PCIP.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("FirstPersonMesh"));
@@ -26,12 +33,13 @@ AHero::AHero(const class FPostConstructInitializeProperties& PCIP)
 	Mesh->SetOwnerNoSee(true);
 }
 
+/*
+* Bind our input components that are set in the editor to the Move functions
+* "MoveForward", "MoveRight" and others are input types that are set using Project Settings -> Input in the editor
+* @InputComponent: UE defined input processor
+*/
 void AHero::SetupPlayerInputComponent(UInputComponent* InputComponent)
 {
-	/*
-	* Bind our input components that we set in the editor to the Move functions
-	* "MoveForward", "MoveRight" and others are input types that we set using Project Settings -> Input in the editor
-	*/
 	InputComponent->BindAxis("MoveForward", this, &AHero::MoveForward);
 	InputComponent->BindAxis("MoveRight", this, &AHero::MoveRight);
 	InputComponent->BindAxis("Turn", this, &AHero::AddControllerYawInput);
@@ -44,10 +52,11 @@ void AHero::SetupPlayerInputComponent(UInputComponent* InputComponent)
 
 /*
 * Controls the forward movement of the character.
-* @Params: value defines how much the character moves forward
+* @value: defines how much the character moves forward
 */
 void AHero::MoveForward(float value)
 {
+	//If the controller exists 
 	if ((Controller != NULL) && (value != 0.0f))
 	{
 		//Figure out which way is forward
@@ -79,28 +88,38 @@ void AHero::MoveRight(float value)
 	}
 }
 
-//Start the jump...
+/* 
+* Start the jump...
+*/
 void AHero::OnStartJump()
 {
 	bPressedJump = true;
 }
 
-//...End the jump
+/*
+* ...End the jump
+*/
 void AHero::OnStopJump()
 {
 	bPressedJump = false;
 }
 
-//Start doing damage...
+/*
+* Start doing damage...
+*/
 void AHero::StartDoingDamage()
 {
 	bDoingDamage = true;
+	//Check if the attack is starting correctly
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("attack start"));
 }
 
-//...Stop doing damage
+/*
+* ...Stop doing damage
+*/
 void AHero::StopDoingDamage()
 {
+	//Check if the attack is ending correctly
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("attack end"));
 	bDoingDamage = false;
 	//Empty the array, because we're done with doing damage now
@@ -108,7 +127,8 @@ void AHero::StopDoingDamage()
 }
 
 /*
-* Checks on every frame to see if we're doing damage
+* Checks on every frame to see if we're doing damage; if so, do the stuff
+* @DeltaSeconds: Time passed
 */
 void AHero::Tick(float DeltaSeconds)
 {
@@ -124,7 +144,7 @@ void AHero::Tick(float DeltaSeconds)
 */
 void AHero::AttackTrace()
 {
-	//Overlapping actors stored in this array
+	//Actors that overlap the box stored in this array
 	TArray<struct FOverlapResult> OutOverlaps;
 	//Orient the box in the direction of the character
 	FQuat Rotation = Instigator->GetTransform().GetRotation();
@@ -150,8 +170,8 @@ void AHero::AttackTrace()
 	{
 		if (OutOverlaps[i].GetActor() && !HitActors.Contains(OutOverlaps[i].GetActor()))
 		{
+			//Check if hit registered
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("hit"));
-
 			//Now call the function that does something to our unfortunate actor...
 			ProcessHitActor(OutOverlaps[i].GetActor());
 		}
@@ -161,8 +181,7 @@ void AHero::AttackTrace()
 //Now, the function to despawn the actor
 void AHero::ProcessHitActor(AActor* ActorToProcess)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("EXTERMINATE"));
-
+	//If we're done, we're done
 	if (!ActorToProcess)
 	{
 		return;
@@ -172,7 +191,8 @@ void AHero::ProcessHitActor(AActor* ActorToProcess)
 	FHitResult AttackHitResult;
 	FDamageEvent AttackDamageEvent;
 	AHero* Hero = Cast<AHero>(ActorToProcess);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("EXTERMINATE"));
+	//Check if the function executed correctly
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("damage done"));
+	//Despawn the actor we're processing
 	ActorToProcess->Destroy();
-	
 }

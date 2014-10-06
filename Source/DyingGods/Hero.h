@@ -1,13 +1,12 @@
-
+/**
+* Defines properties and functions for the Hero actor
+*/
 
 #pragma once
 
 #include "GameFramework/Character.h"
 #include "Hero.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class DYINGGODS_API AHero : public ACharacter
 {
@@ -30,7 +29,7 @@ class DYINGGODS_API AHero : public ACharacter
 	//Process actors in hitbox
 	UFUNCTION()
 	void ProcessHitActor(AActor* ActorToProcess);
-	//Override Tick
+	//Override Tick function
 	virtual void Tick(float DeltaSeconds) override;
 	//Is the player doing damage?
 	bool bDoingDamage;

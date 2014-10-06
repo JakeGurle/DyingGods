@@ -1,4 +1,6 @@
-
+/*
+* Implements the game mode; only change from default is adding our hero pawn
+*/
 
 #include "DyingGods.h"
 #include "PrototypeGameMode.h"
